@@ -1,0 +1,65 @@
+service: stardate-app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-southeast-1
+  environment:
+    DB_HOST: stardate.cpfvxpftnbst.ap-southeast-1.rds.amazonaws.com
+    DB_PORT: 5432
+    DB_USER: postgres
+    DB_PASSWORD: 48450420
+    DB_NAME: stardate
+
+functions:
+  loginUser:
+    handler: handler/loginUser.handler
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true
+
+  getAllAlerts:
+    handler: handler/getAllAlerts.handler
+    events:
+      - http:
+          path: alerts
+          method: get
+          cors: true
+
+  getAlert:
+    handler: handler/getAlert.handler
+    events:
+      - http:
+          path: alerts/{id}
+          method: get
+          cors: true
+
+  createAlert:
+    handler: handler/createAlert.handler
+    events:
+      - http:
+          path: alerts
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+resources:
+  Resources:
+    rdsCluster:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        Engine: postgres
+        EngineVersion: "12.4"
+        DBInstanceIdentifier: stardate
+        MasterUsername: postgres
+        MasterUserPassword: 48450420
+        DBInstanceClass: db.t2.micro
+        VPCSecurityGroups:
+          - dbsg(sg-0408eb36db6d3b2a0)
+        # DBSubnetGroupName: my-db-subnet-group
+        AllocatedStorage: 20
+        StorageType: gp2
+        BackupRetentionPeriod: 7
